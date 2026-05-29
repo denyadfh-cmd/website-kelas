@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X E5 - Digital Administrasi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f0f12;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%);
+            padding: 50px 20px;
+            text-align: center;
+            border-bottom: 2px solid #ff0055;
+        }
+
+        .logo-text {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .logo-text span {
+            color: #ff0055;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: #a0a0aa;
+            margin-top: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #16161a;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff0055;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            margin-bottom: 70px;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff0055;
+            padding-left: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Styling Pengurus */
+        .grid-pengurus {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card-pengurus {
+            background-color: #16161a;
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card-pengurus:hover {
+            transform: translateY(-5px);
+            border-color: #ff0055;
+            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.2);
+        }
+
+        .jabatan {
+            color: #ff0055;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .card-pengurus h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        /* Styling Daftar Semua Siswa */
+        .grid-foto {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        .frame-foto {
+            background-color: #16161a;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: center;
+            border: 1px solid #2a2a35;
+            cursor: pointer;
+            
+            /* CSS ANIMASI SCROLL */
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .frame-foto:hover {
+            border-color: #ff0055;
+            transform: scale(1.03);
+        }
+
+        .frame-foto.muncul {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 180px;
+            background-color: #22222b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a4a5a;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .info-siswa {
+            padding: 12px 10px;
+        }
+
+        .absen {
+            font-size: 0.75rem;
+            color: #ff0055;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .nama-siswa {
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* STYLING JENDELA POP-UP (MODAL) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #16161a;
+            border: 2px solid #ff0055;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);
+            position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px; top: 10px;
+            color: #a0a0aa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover { color: #ff0055; }
+
+        .modal-img {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff0055;
+            margin-bottom: 15px;
+        }
+
+        .modal-body p {
+            margin: 10px 0;
+            text-align: left;
+            border-bottom: 1px solid #2a2a35;
+            padding-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .modal-body strong { color: #ff0055; }
+        
+        .motivasi-box {
+            font-style: italic;
+            color: #a0a0aa;
+            background-color: #22222b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px !important;
+            border-left: 3px solid #ff0055;
+        }
+
+        footer {
+            background-color: #09090b;
+            text-align: center;
+            padding: 30px;
+            color: #71717a;
+            font-size: 0.9rem;
+            border-top: 1px solid #1e1e24;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-text">X E5 <span>DIGITAL</span></div>
+        <p class="tagline">The Generation of Efficiency & Innovation | Administrasi Digital</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#struktur">Struktur</a>
+        <a href="#keluarga">Keluarga Kelas</a>
+    </nav>
+
+    <div class="container">
+
+        <section id="home">
+            <h2>Welcome to Our Space</h2>
+            <p>Selamat datang di website resmi kelas X E5 Digital Administrasi. Tempat kami mendokumentasikan kebersamaan, mengelola informasi, dan melangkah bersama memanfaatkan teknologi demi efisiensi masa depan.</p>
+        </section>
+
+        <section id="struktur">
+            <h2>Struktur Organisasi</h2>
+            <div class="grid-pengurus">
+                <div class="card-pengurus">
+                    <div class="jabatan">Ketua Kelas</div>
+                    <h3>ACHMAD AINUL YAQIN</h3>
+                </div>
+                <div class="card-pengurus">
+                    <div class="jabatan">Wakil Ketua Kelas</div>
+                    <h3>DEBBY AGUSTINA JUWITA SARI</h3>
+                </div>
+                <div class="card-pengurus">
+                    <div class="jabatan">Sekretaris 1</div>
+                    <h3>RIFKA AURATUN NABILA</h3>
+                </div>
+                <div class="card-pengurus">
+                    <div class="jabatan">Sekretaris 2</div>
+                    <h3>ALVIANDI ROHMAN BILLAH</h3>
+                </div>
+                <div class="card-pengurus">
+                    <div class="jabatan">Bendahara 1</div>
+                    <h3>DWI MAULIDIA</h3>
+                </div>
+                <div class="card-pengurus">
+                    <div class="jabatan">Bendahara 2</div>
+                    <h3>SYAHDILA MUTIARA CAHYANINGTYAS</h3>
+                </div>
+            </div>
+        </section>
+
+        <section id="keluarga">
+            <h2>Keluarga Besar X E5</h2>
+            <div class="grid-foto">
+                
+                <div class="frame-foto">
+                    <img src="deny.jpg" alt="A. DANIAL FARDIN HILAL" style="width: 100%; height: 180px; object-fit: cover;"
+                         onclick="bukaDetail(this)"
+                         data-nama="A. DANIAL FARDIN HILAL" data-panggilan="Deny / Danial" data-asal="Kota Asal" data-ultah="1 Januari 2010" data-motivasi="Belajar hari ini untuk memimpin di hari esok!">
+                    <div class="info-siswa">
+                        <div class="absen">Absen 01</div>
+                        <div class="nama-siswa" title="A. DANIAL FARDIN HILAL">A. DANIAL FARDIN HILAL</div>
+                    </div>
+                </div>
+
+                <div class="frame-foto"><div class="avatar-placeholder">02</div><div class="info-siswa"><div class="absen">Absen 02</div><div class="nama-siswa" title="ABDUL AZIZ MUSTHOFA">ABDUL AZIZ MUSTHOFA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">03</div><div class="info-siswa"><div class="absen">Absen 03</div><div class="nama-siswa" title="ABDUL HANIF FAWATI">ABDUL HANIF FAWATI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">04</div><div class="info-siswa"><div class="absen">KARTU KETUA</div><div class="nama-siswa" title="ACHMAD AINUL YAQIN">ACHMAD AINUL YAQIN</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">05</div><div class="info-siswa"><div class="absen">Absen 05</div><div class="nama-siswa" title="AINIYATUL BAROROH">AINIYATUL BAROROH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">06</div><div class="info-siswa"><div class="absen">Absen 06</div><div class="nama-siswa" title="ALFINO SYARIF HIDAYATULLAH">ALFINO SYARIF HIDAYATULLAH</div></div></div>
+                
+                <div class="frame-foto">
+                    <img src="alpen.jpg" alt="ALVIANDI ROHMAN BILLAH" style="width: 100%; height: 180px; object-fit: cover;"
+                         onclick="bukaDetail(this)"
+                         data-nama="ALVIANDI ROHMAN BILLAH" data-panggilan="Alpen" data-asal="Kota Asal" data-ultah="15 Agustus 2010" data-motivasi="Tetap efisien dan terus berinovasi di era digital!">
+                    <div class="info-siswa">
+                        <div class="absen">SEKRETARIS 2</div>
+                        <div class="nama-siswa" title="ALVIANDI ROHMAN BILLAH">ALVIANDI ROHMAN BILLAH</div>
+                    </div>
+                </div>
+
+                <div class="frame-foto"><div class="avatar-placeholder">08</div><div class="info-siswa"><div class="absen">Absen 08</div><div class="nama-siswa" title="ANIS AGUSTIN">ANIS AGUSTIN</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">09</div><div class="info-siswa"><div class="absen">Absen 09</div><div class="nama-siswa" title="ARINA NUR IZZATI">ARINA NUR IZZATI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">10</div><div class="info-siswa"><div class="absen">Absen 10</div><div class="nama-siswa" title="ARYA ANGGA DIPA">ARYA ANGGA DIPA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">11</div><div class="info-siswa"><div class="absen">Absen 11</div><div class="nama-siswa" title="AWINDA EKA PRATIWI">AWINDA EKA PRATIWI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">12</div><div class="info-siswa"><div class="absen">Absen 12</div><div class="nama-siswa" title="DEAYATUS SULFA">DEAYATUS SULFA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">13</div><div class="info-siswa"><div class="absen">WAKIL KETUA</div><div class="nama-siswa" title="DEBBY AGUSTINA JUWITA SARI">DEBBY AGUSTINA JUWITA SARI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">14</div><div class="info-siswa"><div class="absen">Absen 14</div><div class="nama-siswa" title="DENDY DWI JULIANDANA">DENDY DWI JULIANDANA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">15</div><div class="info-siswa"><div class="absen">Absen 15</div><div class="nama-siswa" title="DWI MAULIDATUL KHOIRINA">DWI MAULIDATUL KHOIRINA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">16</div><div class="info-siswa"><div class="absen">BENDAHARA 1</div><div class="nama-siswa" title="DWI MAULIDIA">DWI MAULIDIA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">17</div><div class="info-siswa"><div class="absen">Absen 17</div><div class="nama-siswa" title="ILZAM THORIQ ROBBY">ILZAM THORIQ ROBBY</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">18</div><div class="info-siswa"><div class="absen">Absen 18</div><div class="nama-siswa" title="IQDAR FAHREZI">IQDAR FAHREZI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">19</div><div class="info-siswa"><div class="absen">Absen 19</div><div class="nama-siswa" title="IRFAN MAULANA AL ABROR">IRFAN MAULANA AL ABROR</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">20</div><div class="info-siswa"><div class="absen">Absen 20</div><div class="nama-siswa" title="KALIMATUL NASIFAH">KALIMATUL NASIFAH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">21</div><div class="info-siswa"><div class="absen">Absen 21</div><div class="nama-siswa" title="MOH ARIFANDI PUTRA CAHYONO">MOH ARIFANDI PUTRA CAHYONO</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">22</div><div class="info-siswa"><div class="absen">Absen 22</div><div class="nama-siswa" title="M AFIQ KHAIRUL AMIRI">M AFIQ KHAIRUL AMIRI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">23</div><div class="info-siswa"><div class="absen">Absen 23</div><div class="nama-siswa" title="MOH IRFAN ALAMSYAH">MOH IRFAN ALAMSYAH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">24</div><div class="info-siswa"><div class="absen">Absen 24</div><div class="nama-siswa" title="NAUFALVARO PUTRA RENATHA">NAUFALVARO PUTRA RENATHA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">25</div><div class="info-siswa"><div class="absen">Absen 25</div><div class="nama-siswa" title="NURIL FIRJATULLAH FATAH">NURIL FIRJATULLAH FATAH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">26</div><div class="info-siswa"><div class="absen">Absen 26</div><div class="nama-siswa" title="QURROTUL AINI">QURROTUL AINI</div></div></div>
+                
+                <div class="frame-foto">
+                    <img src="rehan.jpg" alt="RAIHAN RIZQULLAH" style="width: 100%; height: 180px; object-fit: cover;"
+                         onclick="bukaDetail(this)"
+                         data-nama="RAIHAN RIZQULLAH" data-panggilan="Rehan" data-asal="Kota Asal" data-ultah="10 Mei 2010" data-motivasi="Melangkah maju tanpa ragu!">
+                    <div class="info-siswa">
+                        <div class="absen">Absen 27</div>
+                        <div class="nama-siswa" title="RAIHAN RIZQULLAH">RAIHAN RIZQULLAH</div>
+                    </div>
+                </div>
+
+                <div class="frame-foto"><div class="avatar-placeholder">28</div><div class="info-siswa"><div class="absen">SEKRETARIS 1</div><div class="nama-siswa" title="RIFKA AURATUN NABILA">RIFKA AURATUN NABILA</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">29</div><div class="info-siswa"><div class="absen">Absen 29</div><div class="nama-siswa" title="RIZA LAILATUL MUSYARROFAH">RIZA LAILATUL MUSYARROFAH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">30</div><div class="info-siswa"><div class="absen">Absen 30</div><div class="nama-siswa" title="SABRINA MUMTAZAH">SABRINA MUMTAZAH</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">31</div><div class="info-siswa"><div class="absen">Absen 31</div><div class="nama-siswa" title="SAFIRA AULIA FIRDAUSI">SAFIRA AULIA FIRDAUSI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">32</div><div class="info-siswa"><div class="absen">Absen 32</div><div class="nama-siswa" title="SHINTYA AGUSTINA RAMADHANI">SHINTYA AGUSTINA RAMADHANI</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">33</div><div class="info-siswa"><div class="absen">Absen 33</div><div class="nama-siswa" title="SILFIA HOLIFATUN NISAK">SILFIA HOLIFATUN NISAK</div></div></div>
+                <div class="frame-foto"><div class="avatar-placeholder">34</div><div class="info-siswa"><div class="absen">BENDAHARA 2</div><div class="nama-siswa" title="SYAHDILA MUTIARA CAHYANINGTYAS">SYAHDILA MUTIARA CAHYANINGTYAS</div></div></div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <div id="siswaModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="tutupDetail()">&times;</span>
+            <img id="popFoto" class="modal-img" src="" alt="Foto Siswa">
+            <h3 id="popNamaLengkap" style="color:#ff0055; margin-bottom:15px;">Nama Lengkap</h3>
+            <div class="modal-body">
+                <p><strong>Nama Panggilan:</strong> <span id="popPanggilan">-</span></p>
+                <p><strong>Asal Daerah:</strong> <span id="popAsal">-</span></p>
+                <p><strong>Tanggal Lahir:</strong> <span id="popUltah">-</span></p>
+                <p class="motivasi-box"><strong>Motivasi:</strong> <span id="popMotivasi">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 X E5 Digital Administrasi. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // 1. ANIMASI SCROLL (MUNCUL BERTAHAP)
+        const semuaKotakSiswa = document.querySelectorAll('.frame-foto');
+        
+        const pengamatScroll = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('muncul');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        semuaKotakSiswa.forEach(kotak => {
+            pengamatScroll.observe(kotak);
+        });
+        
+        // 2. MODAL POP-UP DETAIL SISWA
+        const modal = document.getElementById('siswaModal');
+
+        function bukaDetail(elemenGambar) {
+            const foto = elemenGambar.src;
+            const nama = elemenGambar.getAttribute('data-nama');
+            const panggilan = elemenGambar.getAttribute('data-panggilan');
+            const asal = elemenGambar.getAttribute('data-asal');
+            const ultah = elemenGambar.getAttribute('data-ultah');
+            const motivasi = elemenGambar.getAttribute('data-motivasi');
+
+            document.getElementById('popFoto').src = foto;
+            document.getElementById('popNamaLengkap').innerText = nama;
+            document.getElementById('popPanggilan').innerText = panggilan || "-";
+            document.getElementById('popAsal').innerText = asal || "-";
+            document.getElementById('popUltah').innerText = ultah || "-";
+            document.getElementById('popMotivasi').innerText = motivasi || "-";
+
+            modal.style.display = "flex";
+        }
+
+        function tutupDetail() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                tutupDetail();
+            }
+        }
+    </script>
+</body>
+</html>
