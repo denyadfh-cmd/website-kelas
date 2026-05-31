@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X E5 - Digital Administration Portal</title>
+  <style>
+/* --- RESET & BASE STYLES --- */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+html { scroll-behavior: smooth; }
+
+:root {
+    --bg-principal: #0a0c10;
+    --bg-surface: #121620;
+    --bg-surface-glow: #1a2030;
+    --accent-cyan: #00f0ff;
+    --accent-blue: #0072ff;
+    --text-main: #ffffff;
+    --text-muted: #8b9bb4;
+    --border-color: rgba(0, 240, 255, 0.15);
+}
+
+body { background-color: var(--bg-principal); color: var(--text-main); line-height: 1.6; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+
+/* Light mode */
+body.light-mode {
+    --bg-principal: #f0f4f8; --bg-surface: #ffffff; --bg-surface-glow: #e8f0fe;
+    --text-main: #1a202c; --text-muted: #4a5568; --border-color: rgba(0, 114, 255, 0.2);
+}
+
+/* --- HEADER & BRANDING --- */
+header { background: radial-gradient(circle at top right, #141b2d 0%, var(--bg-principal) 100%); padding: 60px 20px 40px 20px; text-align: center; border-bottom: 1px solid var(--border-color); position: relative; }
+body.light-mode header { background: radial-gradient(circle at top right, #dbeafe 0%, var(--bg-principal) 100%); }
+
+.logo-container { display: flex; justify-content: center; align-items: center; gap: 25px; margin-bottom: 20px; flex-wrap: nowrap; }
+
+.logo-wrapper { width: 75px; height: 75px; flex-shrink: 0; background: rgba(255,255,255,0.03); border: 2px solid var(--border-color); border-radius: 16px; display: flex; align-items: center; justify-content: center; padding: 8px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.05); transition: transform 0.3s, border-color 0.3s; font-weight: bold; color: var(--accent-cyan); font-size: 1rem; }
+.logo-wrapper:hover { transform: translateY(-3px); border-color: var(--accent-cyan); }
+.logo-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.logo-text { font-size: 2.5rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+body.light-mode .logo-text { background: linear-gradient(135deg, #1a202c 30%, var(--accent-blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.tagline { font-size: 1rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 5px; }
+
+/* --- NAVIGATION --- */
+nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; background: rgba(18,22,32,0.85); backdrop-filter: blur(12px); padding: 15px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); }
+body.light-mode nav { background: rgba(240,244,248,0.92); border-bottom: 1px solid var(--border-color); }
+nav a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 600; transition: color 0.3s; padding: 5px 0; }
+nav a:hover { color: var(--accent-cyan); }
+
+/* --- MAIN CONTAINER --- */
+.container { max-width: 1140px; margin: 50px auto; padding: 0 20px; }
+section { margin-bottom: 80px; scroll-margin-top: 90px; }
+h2 { font-size: 1.75rem; margin-bottom: 35px; color: var(--text-main); text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+h2::before { content: ''; display: inline-block; width: 4px; height: 24px; background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-blue)); border-radius: 2px; flex-shrink: 0; }
+
+.welcome-panel { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 25px 30px; color: var(--text-muted); font-size: 1rem; line-height: 1.8; }
+
+/* --- QUOTES --- */
+.quotes-container { background: linear-gradient(135deg, #0d1b2a, #1a2a3a); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-cyan); border-radius: 14px; padding: 28px 32px; margin-bottom: 30px; position: relative; overflow: hidden; }
+body.light-mode .quotes-container { background: linear-gradient(135deg, #e8f4fd, #dbeafe); }
+.quotes-badge { font-size: 0.65rem; letter-spacing: 2px; color: var(--accent-cyan); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
+#teksQuotes { font-size: 1.05rem; color: var(--text-main); font-style: italic; line-height: 1.7; margin-bottom: 8px; }
+#authorQuotes { font-size: 0.85rem; color: var(--accent-cyan); font-weight: 600; }
+
+/* --- CALC BUTTON --- */
+.shortcut-calc-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
+.btn-pintasan-calc { background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: #000; border: none; border-radius: 12px; padding: 14px 28px; font-size: 0.9rem; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 20px rgba(0, 240, 255, 0.25); }
+.btn-pintasan-calc:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 240, 255, 0.4); }
+
+/* --- CARDS & GRIDS --- */
+.grid-pengurus { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+.card-pengurus { background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.03); border-left: 3px solid var(--accent-blue); border-radius: 14px; padding: 25px; transition: 0.3s; }
+.card-pengurus:hover { transform: translateY(-4px); border-left-color: var(--accent-cyan); background: var(--bg-surface-glow); }
+.card-pengurus .jabatan { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-cyan); margin-bottom: 8px; font-weight: 600; }
+.card-pengurus h3 { color: var(--text-main); font-size: 1rem; }
+
+/* --- SEARCH & STATS --- */
+.search-container { margin-bottom: 20px; }
+.search-container input { width: 100%; padding: 14px 20px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border-color 0.3s; }
+.search-container input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.15); }
+.stats-container { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+.stat-box { flex: 1; min-width: 90px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; text-align: center; }
+.stat-number { font-size: 2rem; font-weight: 800; color: var(--accent-cyan); line-height: 1; }
+.stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+/* --- FOTO GRID --- */
+.grid-foto, .grid-galeri { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+.frame-foto, .frame-galeri { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden; height: auto; min-height: 240px; display: flex; flex-direction: column; transition: opacity 0.5s, transform 0.5s, border-color 0.3s; opacity: 0; transform: translateY(30px); cursor: pointer; }
+body.light-mode .frame-foto, body.light-mode .frame-galeri { background: var(--bg-surface); border-color: var(--border-color); }
+.frame-foto.muncul, .frame-galeri.muncul { opacity: 1; transform: translateY(0); }
+.frame-foto:hover, .frame-galeri:hover { border-color: var(--accent-cyan); }
+.frame-foto img { width: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover; flex: none !important; }
+.foto-kenangan { width: 100%; height: 140px; object-fit: cover; }
+.avatar-placeholder { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a2030, #0d1520); color: var(--accent-cyan); font-size: 2rem; font-weight: 800; width: 100% !important; aspect-ratio: 1 / 1 !important; flex: none !important; }
+body.light-mode .avatar-placeholder { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--accent-blue); }
+.keterangan-foto, .info-siswa { padding: 10px 12px; background: rgba(9,11,16,0.9); flex-grow: 1; }
+body.light-mode .keterangan-foto, body.light-mode .info-siswa { background: rgba(255,255,255,0.95); }
+.keterangan-foto h4 { font-size: 0.8rem; color: var(--text-main); margin-bottom: 4px; }
+.keterangan-foto p { font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; }
+.absen { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 3px; }
+.jabatan-khusus { color: var(--accent-cyan) !important; font-weight: 700; }
+.nama-siswa { font-size: 0.75rem; color: var(--text-main); font-weight: 600; line-height: 1.3; word-wrap: break-word; }
+
+/* --- ULANG TAHUN & GUESTBOOK UI --- */
+.ultah-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+.ultah-card { background: linear-gradient(135deg, var(--bg-surface), rgba(0, 240, 255, 0.05)); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; transition: transform 0.3s; }
+.ultah-card:hover { transform: translateY(-3px); border-color: var(--accent-cyan); }
+.ultah-icon { font-size: 2rem; }
+.ultah-info h4 { color: var(--text-main); font-size: 0.95rem; margin-bottom: 3px; }
+.ultah-info p { color: var(--accent-cyan); font-size: 0.8rem; font-weight: bold; margin-bottom: 2px; }
+.ultah-info .countdown { color: var(--text-muted); font-size: 0.75rem; }
+
+.guestbook-form { display: flex; flex-direction: column; gap: 15px; }
+.guestbook-form input, .guestbook-form textarea { width: 100%; padding: 15px; background: var(--bg-principal); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: border-color 0.3s; }
+.guestbook-form input:focus, .guestbook-form textarea:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.1); }
+.guestbook-form textarea { resize: vertical; min-height: 120px; }
+.btn-wa { background: #25D366; color: #fff; font-weight: bold; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: background 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.btn-wa:hover { background: #128C7E; }
+
+/* --- MODALS --- */
+.modal, .calc-modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(5,7,10,0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+.modal.aktif, .calc-modal.aktif { display: flex; }
+.modal-content, .calc-content { background: var(--bg-surface); border: 1px solid var(--border-color); border-top: 4px solid var(--accent-cyan); padding: 25px; border-radius: 16px; width: 90%; max-width: 420px; position: relative; max-height: 90vh; overflow-y: auto; }
+.close-btn, .calc-close { position: absolute; top: 15px; right: 18px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1; transition: color 0.2s; }
+.close-btn:hover, .calc-close:hover { color: var(--accent-cyan); }
+.modal-img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); }
+.modal-info { display: flex; flex-direction: column; gap: 10px; }
+.modal-info p { font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px; }
+.modal-info strong { color: var(--text-main); }
+.motivasi-box { background: rgba(0,240,255,0.05); border-radius: 8px; padding: 10px !important; border-bottom: none !important; }
+
+/* --- CALC MODAL INTERNALS --- */
+.calc-header { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+.calc-header h4 { color: var(--accent-cyan); font-size: 1rem; letter-spacing: 1px; }
+.calc-instruction { color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; }
+.calc-body { display: flex; flex-direction: column; gap: 10px; }
+.input-group-nama-siswa { display: flex; flex-direction: column; gap: 5px; }
+.input-group-nama-siswa label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.input-group-nama-siswa input, .input-nama-mapel, .input-nilai-mapel { background: var(--bg-principal); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.input-group-nama-siswa input:focus, .input-nama-mapel:focus, .input-nilai-mapel:focus { border-color: var(--accent-cyan); }
+.mapel-dynamic-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.row-mapel-input { display: flex; gap: 8px; align-items: center; }
+.input-nama-mapel { flex: 2; }
+.input-nilai-mapel { flex: 1; min-width: 70px; }
+.btn-hapus-row { background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; flex-shrink: 0; transition: background 0.2s; }
+.btn-hapus-row:hover { background: rgba(231,76,60,0.3); }
+.calc-action-buttons { display: flex; gap: 10px; margin-top: 5px; }
+.btn-tambah-mapel { background: rgba(0,240,255,0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 8px; padding: 9px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 1px; transition: background 0.2s; flex: 1; }
+.btn-tambah-mapel:hover { background: rgba(0,240,255,0.2); }
+.btn-hitung-calc { width: 100%; margin-top: 12px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: #000; border: none; border-radius: 10px; padding: 13px; font-weight: 800; font-size: 0.85rem; letter-spacing: 1.5px; cursor: pointer; transition: opacity 0.2s; }
+.btn-hitung-calc:hover { opacity: 0.85; }
+.calc-result { margin-top: 15px; background: rgba(0,240,255,0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; text-align: center; }
+.res-label-nama { font-size: 0.75rem; letter-spacing: 2px; color: var(--accent-cyan); margin-bottom: 8px; font-weight: 700; }
+.res-label { font-size: 0.8rem; color: var(--text-muted); }
+.res-number { font-size: 3rem; font-weight: 900; color: var(--accent-cyan); line-height: 1.1; margin: 8px 0; }
+.res-status { font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; }
+
+/* --- PAPAN PENGUMUMAN --- */
+.pengumuman-list { display:flex; flex-direction:column; gap:14px; }
+.pengumuman-card { background:var(--bg-surface); border:1px solid var(--border-color); border-left:4px solid var(--accent-cyan); border-radius:12px; padding:18px 20px; position:relative; }
+.pengumuman-card .p-judul { font-size:1rem; font-weight:700; color:var(--text-main); margin-bottom:6px; }
+.pengumuman-card .p-isi { font-size:0.88rem; color:var(--text-muted); line-height:1.6; white-space:pre-wrap; }
+.pengumuman-card .p-meta { font-size:0.72rem; color:var(--accent-cyan); margin-top:10px; letter-spacing:1px; }
+.pengumuman-card .p-hapus { position:absolute; top:12px; right:14px; background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); color:#e74c3c; border-radius:6px; padding:4px 10px; font-size:0.75rem; cursor:pointer; display:none; }
+.pengumuman-card .p-hapus:hover { background:rgba(231,76,60,0.35); }
+body.admin-mode .pengumuman-card .p-hapus { display:inline-block; }
+.pengumuman-kosong { text-align:center; color:var(--text-muted); padding:30px; font-size:0.9rem; }
+.form-pengumuman { display:none; background:var(--bg-surface); border:1px solid var(--accent-cyan); border-radius:14px; padding:20px; margin-bottom:24px; flex-direction:column; gap:12px; }
+body.admin-mode .form-pengumuman { display:flex; }
+.form-pengumuman input, .form-pengumuman textarea { background:var(--bg-principal); border:1px solid var(--border-color); border-radius:8px; padding:11px 14px; color:var(--text-main); font-size:0.9rem; outline:none; font-family:inherit; }
+.form-pengumuman input:focus, .form-pengumuman textarea:focus { border-color:var(--accent-cyan); }
+.form-pengumuman textarea { resize:vertical; min-height:90px; }
+.btn-post-pengumuman { background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan)); color:#000; border:none; border-radius:10px; padding:12px; font-weight:800; font-size:0.85rem; letter-spacing:1px; cursor:pointer; }
+.admin-bar { display:none; background:rgba(0,240,255,0.08); border:1px solid var(--accent-cyan); border-radius:10px; padding:10px 16px; margin-bottom:20px; align-items:center; justify-content:space-between; font-size:0.82rem; color:var(--accent-cyan); font-weight:700; letter-spacing:1px; }
+body.admin-mode .admin-bar { display:flex; }
+.btn-logout-admin { background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.4); color:#e74c3c; border-radius:6px; padding:5px 12px; font-size:0.75rem; cursor:pointer; font-weight:700; }
+.btn-admin-login { background:transparent; border:1px solid var(--border-color); color:var(--text-muted); border-radius:8px; padding:8px 14px; font-size:0.75rem; cursor:pointer; letter-spacing:1px; margin-bottom:20px; }
+.admin-modal { display:none; position:fixed; z-index:10001; left:0; top:0; width:100%; height:100%; background:rgba(5,7,10,0.95); backdrop-filter:blur(10px); align-items:center; justify-content:center; }
+.admin-modal.aktif { display:flex; }
+.admin-modal-content { background:var(--bg-surface); border:1px solid var(--border-color); border-top:4px solid var(--accent-cyan); padding:30px; border-radius:16px; width:90%; max-width:360px; position:relative; }
+.admin-modal-content h4 { color:var(--accent-cyan); font-size:1rem; letter-spacing:2px; margin-bottom:6px; }
+.admin-modal-content p { color:var(--text-muted); font-size:0.82rem; margin-bottom:20px; }
+.admin-modal-content input { width:100%; background:var(--bg-principal); border:1px solid var(--border-color); border-radius:8px; padding:12px 14px; color:var(--text-main); font-size:0.9rem; outline:none; margin-bottom:12px; }
+.admin-modal-content input:focus { border-color:var(--accent-cyan); }
+.btn-masuk-admin { width:100%; background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan)); color:#000; border:none; border-radius:10px; padding:13px; font-weight:800; font-size:0.85rem; letter-spacing:1.5px; cursor:pointer; }
+.login-error { color:#e74c3c; font-size:0.8rem; margin-top:8px; text-align:center; display:none; }
+
+#galeri { padding: 0; max-width: none; }
+footer { text-align: center; padding: 30px 20px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; margin-top: 60px; }
+#btnKeAtas { position: fixed; bottom: 25px; right: 25px; z-index: 99; background: rgba(18,22,32,0.85); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 12px 15px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: none; transition: background 0.2s; backdrop-filter: blur(8px); }
+#btnKeAtas:hover { background: rgba(0,240,255,0.15); }
+#btnToggleMode { position: fixed; top: 20px; right: 20px; z-index: 1001; padding: 10px 12px; cursor: pointer; border-radius: 50%; background: rgba(18,22,32,0.85); border: 1px solid var(--border-color); font-size: 1.1rem; backdrop-filter: blur(8px); transition: border-color 0.2s; }
+#btnToggleMode:hover { border-color: var(--accent-cyan); }
+.click-particle { position: fixed; pointer-events: none; border-radius: 50%; background: var(--accent-cyan); opacity: 0.8; z-index: 99999; animation: particleBlast 0.6s ease-out forwards; }
+@keyframes particleBlast { 0% { transform: translate(0, 0) scale(1); opacity: 0.8; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
+
+@media (max-width: 600px) {
+    .logo-container { gap: 10px; flex-wrap: nowrap; }
+    .logo-wrapper { width: 50px; height: 50px; padding: 5px; font-size: 0.75rem;}
+    .logo-text { font-size: 1.25rem; letter-spacing: 1px; }
+    .logo-text span { display: block; font-size: 0.85rem; margin-top: 2px;}
+    .grid-galeri, .grid-foto { grid-template-columns: repeat(2, 1fr); }
+    nav a { margin: 0 8px; font-size: 0.85rem; }
+    .stats-container { gap: 10px; }
+    .row-mapel-input { flex-wrap: wrap; }
+}
+  </style>
+</head>
+<body>
+
+<button id="btnToggleMode" onclick="toggleTheme()" title="Ganti tema">🌓</button>
+
+<header>
+    <div class="logo-container">
+        <div class="logo-wrapper" title="Logo Sekolah">
+            <img src="logo man2.png" alt="Logo Sekolah" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerText='SCH'">
+        </div>
+        <div class="logo-text">X E5 <span>Administration</span></div>
+        <div class="logo-wrapper" title="Logo Kelas X E5">
+            <img src="logo kelas.png" alt="Logo Kelas" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerText='E5'">
+        </div>
+    </div>
+    <p class="tagline">Data Management & Academic Profile Ecosystem</p>
+</header>
+
+<nav>
+    <a href="#home">Overview</a>
+    <a href="#pengumuman">Pengumuman</a>
+    <a href="#struktur">Structure</a>
+    <a href="#keluarga">Class Registry</a>
+    <a href="#ultah">Birthday</a>
+    <a href="#galeri">Memories</a>
+    <a href="#guestbook">Guestbook</a>
+</nav>
+
+<div class="container">
+
+    <section id="home">
+        <div class="quotes-container">
+            <div class="quotes-badge">SYSTEM NOTIFICATION: QUOTE OF THE DAY</div>
+            <p id="teksQuotes">"Loading encryption matrix..."</p>
+            <span id="authorQuotes">- X E5 Admin</span>
+        </div>
+
+        <div class="shortcut-calc-wrapper">
+            <button class="btn-pintasan-calc" onclick="bukaKalkulator()">
+                📊 KALKULATOR NILAI RAPOR X E5
+            </button>
+        </div>
+
+        <div id="modalKalkulator" class="calc-modal">
+            <div class="calc-content">
+                <span class="calc-close" onclick="tutupKalkulator()">&times;</span>
+                <div class="calc-header">
+                    <h4>⚡ GRADE CALCULATOR SYSTEM</h4>
+                    <p class="calc-instruction">Tambahkan mata pelajaran dan nilai rapor kamu di bawah ini:</p>
+                </div>
+                <div class="calc-body">
+                    <div class="input-group-nama-siswa">
+                        <label>Nama Siswa :</label>
+                        <input type="text" id="valNamaSiswaRaport" placeholder="Masukkan nama kamu...">
+                    </div>
+                    <div id="containerListMapel" class="mapel-dynamic-list">
+                        <div class="row-mapel-input">
+                            <input type="text" class="input-nama-mapel" placeholder="Nama Mapel (Misal: Kimia)">
+                            <input type="number" class="input-nilai-mapel" placeholder="Nilai" min="0" max="100">
+                            <button class="btn-hapus-row" onclick="hapusBarisMapel(this)">&times;</button>
+                        </div>
+                    </div>
+                    <div class="calc-action-buttons">
+                        <button class="btn-tambah-mapel" onclick="tambahBarisMapel()">➕ TAMBAH MAPEL</button>
+                    </div>
+                    <button class="btn-hitung-calc" onclick="hitungRaporDinamis()">HITUNG RATA-RATA RAPOR</button>
+                    <div id="hasilKalkulator" class="calc-result" style="display:none;">
+                        <div id="resNamaPemilik" class="res-label-nama">RAPOR SISWA</div>
+                        <div class="res-label">TOTAL: <span id="resTotalMapel">0</span> MATA PELAJARAN</div>
+                        <div class="res-label" style="margin-top:5px;">RATA-RATA RAPOR:</div>
+                        <div id="resAngka" class="res-number">0.0</div>
+                        <div id="resStatus" class="res-status">STATUS</div>
+                        <button id="btnDownloadPDF" onclick="downloadRaporPDF()" style="margin-top:15px;padding:10px 18px;background:#00f0ff;color:#000;border:none;cursor:pointer;font-weight:bold;border-radius:8px;">
+                            📥 Download Rapor PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Overview Portal</h2>
+        <div class="welcome-panel">
+            <p>Selamat datang di Pusat Administrasi Digital Kelas X E5. Ekosistem ini dirancang secara terpadu untuk mendokumentasikan profil internal, memetakan struktur organisasi kepengurusan, serta mengoptimalkan transparansi informasi guna mewujudkan tata kelola kelas yang modern, efisien, dan kolaboratif.</p>
+        </div>
+    </section>
+    
+    <section id="pengumuman">
+        <h2 id="judulPengumuman">📢 Papan Pengumuman</h2>
+        <div class="admin-bar">
+            <span>⚡ MODE ADMIN AKTIF</span>
+            <button class="btn-logout-admin" onclick="logoutAdmin()">LOGOUT</button>
+        </div>
+        <button class="btn-admin-login" id="btnLoginAdmin" onclick="bukaModalAdmin()" style="display:none;">🔐 LOGIN ADMIN</button>
+        <div class="form-pengumuman">
+            <input type="text" id="inputJudulPengumuman" placeholder="Judul pengumuman...">
+            <textarea id="inputIsiPengumuman" placeholder="Isi pengumuman..."></textarea>
+            <button class="btn-post-pengumuman" onclick="postPengumuman()">📌 POST PENGUMUMAN</button>
+        </div>
+        <div class="pengumuman-list" id="listPengumuman">
+            <div class="pengumuman-kosong">⏳ Memuat pengumuman...</div>
+        </div>
+    </section>
+
+    <section id="struktur">
+        <h2>Struktur Kepengurusan</h2>
+        <div class="grid-pengurus">
+            <div class="card-pengurus"><div class="jabatan">Ketua Kelas</div><h3>ACHMAD AINUL YAQIN</h3></div>
+            <div class="card-pengurus"><div class="jabatan">Wakil Ketua Kelas</div><h3>DEBBY AGUSTINA JUWITA SARI</h3></div>
+            <div class="card-pengurus"><div class="jabatan">Sekretaris 1</div><h3>RIFKA AURATUN NABILA</h3></div>
+            <div class="card-pengurus"><div class="jabatan">Sekretaris 2</div><h3>ALVIANDI ROHMAN BILLAH</h3></div>
+            <div class="card-pengurus"><div class="jabatan">Bendahara 1</div><h3>DWI MAULIDIA</h3></div>
+            <div class="card-pengurus"><div class="jabatan">Bendahara 2</div><h3>SYAHDILA MUTIARA CAHYANINGTYAS</h3></div>
+        </div>
+    </section>
+
+    <section id="keluarga">
+        <h2>Registrasi Anggota Kelas (34 Siswa)</h2>
+        <div class="search-container">
+            <input type="text" id="cariSiswa" placeholder="Cari nama atau nomor absen siswa..." onkeyup="filterSiswa()">
+        </div>
+        <div class="stats-container">
+            <div class="stat-box"><div class="stat-number">34</div><div class="stat-label">Total Siswa</div></div>
+            <div class="stat-box"><div class="stat-number">17</div><div class="stat-label">Laki-Laki</div></div>
+            <div class="stat-box"><div class="stat-number">17</div><div class="stat-label">Perempuan</div></div>
+        </div>
+        <div class="grid-foto" id="wadahSiswa">
+            <div class="frame-foto">
+                <img src="deny.jpg" alt="A. DANIAL FARDIN HILAL" onclick="bukaDetail(this)"
+                     data-nama="A. DANIAL FARDIN HILAL" data-panggilan="Deny / Danial" data-asal="Desa Ceguk" data-ultah="13 Mei 2009" data-motivasi="Belajar hari ini untuk memimpin di hari esok!">
+                <div class="info-siswa"><div class="absen">Absen 01</div><div class="nama-siswa">A. DANIAL FARDIN HILAL</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">02</div><div class="info-siswa"><div class="absen">Absen 02</div><div class="nama-siswa">ABDUL AZIZ MUSTHOFA</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">03</div><div class="info-siswa"><div class="absen">Absen 03</div><div class="nama-siswa">ABDUL HANIF FAWATI</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">04</div><div class="info-siswa"><div class="absen jabatan-khusus">Ketua Kelas</div><div class="nama-siswa">ACHMAD AINUL YAQIN</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">05</div><div class="info-siswa"><div class="absen">Absen 05</div><div class="nama-siswa">AINIYATUL BAROROH</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">06</div><div class="info-siswa"><div class="absen">Absen 06</div><div class="nama-siswa">ALFINO SYARIF HIDAYATULLAH</div></div></div>
+            <div class="frame-foto">
+                <img src="alpen.jpg" alt="ALVIANDI ROHMAN BILLAH" onclick="bukaDetail(this)"
+                     data-nama="ALVIANDI ROHMAN BILLAH" data-panggilan="Alpen" data-asal="Desa Mondung" data-ultah="09 Juli 2010" data-motivasi="Makan Is Number One">
+                <div class="info-siswa"><div class="absen jabatan-khusus">Sekretaris 2</div><div class="nama-siswa">ALVIANDI ROHMAN BILLAH</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">08</div><div class="info-siswa"><div class="absen">Absen 08</div><div class="nama-siswa">ANIS AGUSTIN</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">09</div><div class="info-siswa"><div class="absen">Absen 09</div><div class="nama-siswa">ARINA NUR IZZATI</div></div></div>
+            <div class="frame-foto">
+                <img src="arya.jpg" alt="ARYA ANGGA DIPA" onclick="bukaDetail(this)"
+                     data-nama="ARYA ANGGA DIPA" data-panggilan="ARYA" data-asal="Desa Ponteh" data-ultah="10 Mei 2010" data-motivasi="Melangkah maju tanpa ragu!">
+                <div class="info-siswa"><div class="absen">Absen 10</div><div class="nama-siswa">ARYA ANGGA DIPA</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">11</div><div class="info-siswa"><div class="absen">Absen 11</div><div class="nama-siswa">AWINDA EKA PRATIWI</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">12</div><div class="info-siswa"><div class="absen">Absen 12</div><div class="nama-siswa">DEAYATUS SULFA</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">13</div><div class="info-siswa"><div class="absen jabatan-khusus">Wakil Ketua</div><div class="nama-siswa">DEBBY AGUSTINA JUWITA SARI</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">14</div><div class="info-siswa"><div class="absen">Absen 14</div><div class="nama-siswa">DENDY DWI JULIANDANA</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">15</div><div class="info-siswa"><div class="absen">Absen 15</div><div class="nama-siswa">DWI MAULIDATUL KHOIRINA</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">16</div><div class="info-siswa"><div class="absen jabatan-khusus">Bendahara 1</div><div class="nama-siswa">DWI MAULIDIA</div></div></div>
+            <div class="frame-foto">
+                <img src="ilzam.jpg" alt="ILZAM THORIQ ROBBY" onclick="bukaDetail(this)"
+                     data-nama="ILZAM THORIQ ROBBY" data-panggilan="ILZAM" data-asal="Desa Pakong" data-ultah="11 Mei 2009" data-motivasi="Ingin Hidup!">
+                <div class="info-siswa"><div class="absen">Absen 17</div><div class="nama-siswa">ILZAM THORIQ ROBBY</div></div>
+            </div>
+            <div class="frame-foto">
+                <img src="iqdar.jpg" alt="IQDAR FAHREZI" onclick="bukaDetail(this)"
+                     data-nama="IQDAR FAHREZI" data-panggilan="IQDAR" data-asal="Desa Mondung" data-ultah="13 Mei 2009" data-motivasi="Belajar hari ini untuk memimpin di hari esok!">
+                <div class="info-siswa"><div class="absen">Absen 18</div><div class="nama-siswa">IQDAR FAHREZI</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">19</div><div class="info-siswa"><div class="absen">Absen 19</div><div class="nama-siswa">IRFAN MAULANA AL ABROR</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">20</div><div class="info-siswa"><div class="absen">Absen 20</div><div class="nama-siswa">KALIMATUL NASIFAH</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">21</div><div class="info-siswa"><div class="absen">Absen 21</div><div class="nama-siswa">MOH ARIFANDI PUTRA CAHYONO</div></div></div>
+            <div class="frame-foto">
+                <img src="fafan.jpg" alt="MOH ARIFANDI PUTRA CAHYONO" onclick="bukaDetail(this)"
+                     data-nama="MOH ARIFANDI PUTRA CAHYONO" data-panggilan="FAFAN" data-asal="Desa Ceguk" data-ultah="13 Mei 2009" data-motivasi="Belajar hari ini untuk memimpin di hari esok!">
+                <div class="info-siswa"><div class="absen">Absen 22</div><div class="nama-siswa">MOH ARIFANDI PUTRA CAHYONO</div></div>
+            </div>
+            <div class="frame-foto">
+                <img src="irfan.jpg" alt="MOH. IRFAN ALAMSYAH" onclick="bukaDetail(this)"
+                     data-nama="MOH. IRFAN ALAMSYAH" data-panggilan="IRFAN" data-asal="Desa Ceguk" data-ultah="13 Mei 2009" data-motivasi="Belajar hari ini untuk memimpin di hari esok!">
+                <div class="info-siswa"><div class="absen">Absen 23</div><div class="nama-siswa">MOH. IRFAN ALAMSYAH</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">24</div><div class="info-siswa"><div class="absen">Absen 24</div><div class="nama-siswa">NAUFALVARO PUTRA RENATHA</div></div></div>
+            <div class="frame-foto">
+                <img src="fatah.jpg" alt="NURIL FIRJATULLAH FATAH" onclick="bukaDetail(this)"
+                     data-nama="NURIL FIRJATULLAH FATAH" data-panggilan="NURIL" data-asal="Kota Asal" data-ultah="10 Mei 2010" data-motivasi="Melangkah maju tanpa ragu!">
+                <div class="info-siswa"><div class="absen">Absen 25</div><div class="nama-siswa">NURIL FIRJATULLAH FATAH</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">26</div><div class="info-siswa"><div class="absen">Absen 26</div><div class="nama-siswa">QURROTUL AINI</div></div></div>
+            <div class="frame-foto">
+                <img src="rehan.jpg" alt="RAIHAN RIZQULLAH" onclick="bukaDetail(this)"
+                     data-nama="RAIHAN RIZQULLAH" data-panggilan="Rehan" data-asal="Kota Asal" data-ultah="10 Mei 2010" data-motivasi="Melangkah maju tanpa ragu!">
+                <div class="info-siswa"><div class="absen">Absen 27</div><div class="nama-siswa">RAIHAN RIZQULLAH</div></div>
+            </div>
+            <div class="frame-foto"><div class="avatar-placeholder">28</div><div class="info-siswa"><div class="absen jabatan-khusus">Sekretaris 1</div><div class="nama-siswa">RIFKA AURATUN NABILA</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">29</div><div class="info-siswa"><div class="absen">Absen 29</div><div class="nama-siswa">RIZA LAILATUL MUSYARROFAH</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">30</div><div class="info-siswa"><div class="absen">Absen 30</div><div class="nama-siswa">SABRINA MUMTAZAH</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">31</div><div class="info-siswa"><div class="absen">Absen 31</div><div class="nama-siswa">SAFIRA AULIA FIRDAUSI</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">32</div><div class="info-siswa"><div class="absen">Absen 32</div><div class="nama-siswa">SHINTYA AGUSTINA RAMADHANI</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">33</div><div class="info-siswa"><div class="absen">Absen 33</div><div class="nama-siswa">SILFIA HOLIFATUN NISAK</div></div></div>
+            <div class="frame-foto"><div class="avatar-placeholder">34</div><div class="info-siswa"><div class="absen jabatan-khusus">Bendahara 2</div><div class="nama-siswa">SYAHDILA MUTIARA CAHYANINGTYAS</div></div></div>
+        </div>
+    </section>
+
+    <section id="ultah">
+        <h2>Ulang Tahun Terdekat</h2>
+        <div class="welcome-panel" style="padding: 20px;">
+            <div class="ultah-grid" id="containerUltah">
+                <p style="color:var(--text-muted); font-size:0.9rem;">Sedang memuat data kelahiran siswa...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri">
+        <h2>Memori &amp; Kenang-Kenangan</h2>
+        <div class="grid-galeri">
+            <div class="frame-galeri">
+                <img src="kenangan1.jpg" alt="UPACARA 17 AGUSTUS" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Keseruan saat melakukan kegiatan upacara 17 Agustusan pada tahun 2025." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+1+X+E5'">
+                <div class="keterangan-foto"><h4>UPACARA 17 AGUSTUS</h4><p>Keseruan saat melakukan kegiatan upacara 17 agustusan pada tahun 2025.</p></div>
+            </div>
+            <div class="frame-galeri">
+                <img src="kenangan2.jpg" alt="JJS 17 AGUSTUS" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Momen kompak dan penuh semangat saat kegiatan JJS." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+2+X+E5'">
+                <div class="keterangan-foto"><h4>JJS 17 AGUSTUS</h4><p>Momen kompak dan penuh semangat saat kegiatan JJS.</p></div>
+            </div>
+            <div class="frame-galeri">
+                <img src="kenangan3.jpg" alt="Persiapan OSN & Ujian" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Suasana belajar kelompok dan diskusi mendalam menjelang kompetisi sains dan evaluasi semester." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+3+X+E5'">
+                <div class="keterangan-foto"><h4>Persiapan OSN &amp; Ujian</h4><p>Suasana belajar kelompok menjelang kompetisi dan evaluasi semester.</p></div>
+            </div>
+            <div class="frame-galeri">
+                <img src="kenangan4.jpg" alt="Digital Admin Workshop" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Praktik pemanfaatan perangkat lunak administrasi digital dan spreadsheet untuk efisiensi tata kelola." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+4+X+E5'">
+                <div class="keterangan-foto"><h4>Digital Admin Workshop</h4><p>Praktik pemanfaatan perangkat administrasi digital dan spreadsheet.</p></div>
+            </div>
+            <div class="frame-galeri">
+                <img src="kenangan5.jpg" alt="Kreativitas Canva & AI" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Eksperimen desain grafis presentasi dan pembuatan aset visual modern menggunakan Canva." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+5+X+E5'">
+                <div class="keterangan-foto"><h4>Kreativitas Canva &amp; AI</h4><p>Eksperimen desain grafis presentasi dan pembuatan aset visual modern.</p></div>
+            </div>
+            <div class="frame-galeri">
+                <img src="kenangan6.jpg" alt="Evaluasi & Briefing Kelas" class="foto-kenangan" onclick="bukaFotoKenangan(this)" data-deskripsi="Diskusi rutin bersama pengurus kelas guna menjaga keterbukaan informasi dan kekompakan." onerror="this.src='https://placehold.co/600x338/121620/00f0ff?text=Moment+6+X+E5'">
+                <div class="keterangan-foto"><h4>Evaluasi &amp; Briefing Kelas</h4><p>Diskusi rutin bersama pengurus kelas guna menjaga keterbukaan informasi.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="guestbook">
+        <h2>Buku Tamu Digital</h2>
+        <div class="welcome-panel">
+            <p style="margin-bottom: 20px;">Tinggalkan pesan, kesan, atau salam untuk kelas X E5. Pesan Anda akan dikirimkan langsung ke WhatsApp Admin.</p>
+            <div class="guestbook-form">
+                <input type="text" id="gbNama" placeholder="Nama Anda (Contoh: Budi / Alumni X E5)">
+                <textarea id="gbPesan" placeholder="Tulis pesan Anda di sini..."></textarea>
+                <button class="btn-wa" onclick="kirimWhatsApp()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                    Kirim Pesan ke Admin
+                </button>
+            </div>
+        </div>
+    </section>
+
+</div><div id="areaCetakPDF" style="position: absolute; top: -9999px; left: -9999px; width: 800px; background: #ffffff; color: #000000; padding: 40px; font-family: 'Segoe UI', Arial, sans-serif;">
+    <div style="text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 25px;">
+        <h1 style="margin:0; font-size: 24px; color: #000;">LAPORAN HASIL BELAJAR SISWA</h1>
+        <h2 style="margin:5px 0 0 0; font-size: 18px; color: #333;">KELAS X E5 - DIGITAL ADMINISTRATION</h2>
+    </div>
+    <div style="margin-bottom: 20px;">
+        <p><strong>Nama Siswa : </strong> <span id="pdfNamaSiswa">-</span></p>
+        <p><strong>Tanggal Cetak: </strong> <span id="pdfTanggal">-</span></p>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+        <thead>
+            <tr style="background-color: #f0f0f0;">
+                <th style="border: 1px solid #000; padding: 10px; text-align: left;">Mata Pelajaran</th>
+                <th style="border: 1px solid #000; padding: 10px; text-align: center; width: 150px;">Nilai</th>
+            </tr>
+        </thead>
+        <tbody id="pdfTabelNilai">
+            </tbody>
+    </table>
+    <div style="border: 1px solid #000; padding: 15px; background: #f9f9f9;">
+        <p style="margin:0 0 10px 0; font-size: 16px;"><strong>Total Mata Pelajaran : </strong> <span id="pdfTotalMapel">-</span></p>
+        <p style="margin:0 0 10px 0; font-size: 16px;"><strong>Nilai Rata-Rata : </strong> <span id="pdfRataRata">-</span></p>
+        <p style="margin:0; font-size: 16px;"><strong>Status Akhir : </strong> <span id="pdfStatus">-</span></p>
+    </div>
+    <div style="margin-top: 50px; text-align: right;">
+        <p>Admin Kelas X E5,</p>
+        <br><br><br>
+        <p><strong>( ______________________ )</strong></p>
+    </div>
+</div>
+
+<div id="galeriModal" class="modal">
+    <div class="modal-content" style="max-width:600px;padding:20px;">
+        <span class="close-btn" onclick="tutupFotoKenangan()">&times;</span>
+        <div style="width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;margin-bottom:15px;border:1px solid rgba(255,255,255,0.1);">
+            <img id="popFotoKenangan" src="" alt="Widescreen Preview" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h3 id="popJudulKenangan" style="color:var(--accent-cyan);text-align:left;margin-bottom:6px;font-size:1.1rem;">Judul</h3>
+        <p id="popDeskripsiKenangan" style="color:var(--text-muted);text-align:left;font-size:0.85rem;line-height:1.4;">Deskripsi</p>
+    </div>
+</div>
+
+<div id="siswaModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="tutupDetail()">&times;</span>
+        <img id="popFoto" class="modal-img" src="" alt="Foto Resmi Siswa" onerror="this.style.display='none'">
+        <h3 id="popNamaLengkap" style="color:var(--text-main);font-weight:700;margin-bottom:20px;"></h3>
+        <div class="modal-info">
+            <p><strong>Nama Lengkap:</strong> <span id="popNamaDetail">-</span></p>
+            <p><strong>Nama Panggilan:</strong> <span id="popPanggilan">-</span></p>
+            <p><strong>Asal Daerah:</strong> <span id="popAsal">-</span></p>
+            <p><strong>Tanggal Lahir:</strong> <span id="popUltah">-</span></p>
+            <p class="motivasi-box"><strong>Visi / Motivasi:</strong> <span id="popMotivasi">-</span></p>
+        </div>
+    </div>
+</div>
+
+<footer>
+<p>Hubungi Admin: <a href="mailto:denyadfh@gmail.com" style="color:var(--accent-cyan);text-decoration:none;">denyadfh@gmail.com</a></p>
+    <p>&copy; 2026 X E5 Digital Administration System v2.0. Secure Platform.</p>
+</footer>
+
+<button id="btnKeAtas" onclick="keAtasSystem()" title="Kembali ke atas">&#10224;</button>
+
+<script>
+// =======================================================
+// 1. SOUND EFFECT
+// =======================================================
+let audioContext = null;
+function mainkanSuaraKlik() {
+    try {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') audioContext.resume();
+        const osilator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        osilator.type = 'sine';
+        osilator.frequency.setValueAtTime(1400, audioContext.currentTime);
+        osilator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.05);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+        osilator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        osilator.start();
+        osilator.stop(audioContext.currentTime + 0.05);
+    } catch(e) {}
+}
+
+document.addEventListener('click', function() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+    } catch(e) {}
+}, { once: true });
+
+// =======================================================
+// 2. ANIMASI SCROLL SISWA
+// =======================================================
+const semuaKotakSiswa = Array.from(document.querySelectorAll('.frame-foto'));
+const pengamatScroll = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+            const kartu = entry.target;
+            const urutan = semuaKotakSiswa.indexOf(kartu);
+            kartu.style.transitionDelay = `${(urutan % 6) * 100}ms`;
+            kartu.classList.add('muncul');
+            pengamatScroll.unobserve(kartu);
+        }
+    });
+}, { threshold: 0.05, rootMargin: "0px 0px -10px 0px" });
+semuaKotakSiswa.forEach(k => pengamatScroll.observe(k));
+
+// =======================================================
+// 3. POP-UP PROFIL SISWA
+// =======================================================
+const modal = document.getElementById('siswaModal');
+function bukaDetail(elemenGambar) {
+    mainkanSuaraKlik();
+    document.getElementById('popFoto').src = elemenGambar.src;
+    document.getElementById('popFoto').style.display = 'block';
+    document.getElementById('popNamaLengkap').innerText = "Profile: " + (elemenGambar.getAttribute('data-panggilan') || elemenGambar.getAttribute('data-nama'));
+    document.getElementById('popNamaDetail').innerText = elemenGambar.getAttribute('data-nama') || "-";
+    document.getElementById('popPanggilan').innerText = elemenGambar.getAttribute('data-panggilan') || "-";
+    document.getElementById('popAsal').innerText = elemenGambar.getAttribute('data-asal') || "-";
+    document.getElementById('popUltah').innerText = elemenGambar.getAttribute('data-ultah') || "-";
+    document.getElementById('popMotivasi').innerText = elemenGambar.getAttribute('data-motivasi') || "-";
+    modal.style.display = "flex";
+}
+function tutupDetail() { mainkanSuaraKlik(); modal.style.display = "none"; }
+
+// =======================================================
+// 4. LIVE SEARCH SISWA
+// =======================================================
+function filterSiswa() {
+    const filter = document.getElementById('cariSiswa').value.toLowerCase();
+    const kartuSiswa = document.querySelector('.grid-foto').getElementsByClassName('frame-foto');
+    for (let i = 0; i < kartuSiswa.length; i++) {
+        const nama = kartuSiswa[i].querySelector('.nama-siswa');
+        const absen = kartuSiswa[i].querySelector('.absen');
+        const tNama = nama ? nama.textContent.toLowerCase() : "";
+        const tAbsen = absen ? absen.textContent.toLowerCase() : "";
+        kartuSiswa[i].style.display = (tNama.includes(filter) || tAbsen.includes(filter)) ? "" : "none";
+    }
+}
+
+// =======================================================
+// 5. ANIMASI GALERI & POPUP KENANGAN
+// =======================================================
+const semuaKotakGaleri = Array.from(document.querySelectorAll('.frame-galeri'));
+const pengamatGaleri = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+            const kartu = entry.target;
+            const urutan = semuaKotakGaleri.indexOf(kartu);
+            kartu.style.transitionDelay = `${(urutan % 3) * 120}ms`;
+            kartu.classList.add('muncul');
+            pengamatGaleri.unobserve(kartu);
+        }
+    });
+}, { threshold: 0.05, rootMargin: "0px 0px -10px 0px" });
+semuaKotakGaleri.forEach(k => pengamatGaleri.observe(k));
+
+const gModal = document.getElementById('galeriModal');
+function bukaFotoKenangan(elemenGambar) {
+    mainkanSuaraKlik();
+    document.getElementById('popFotoKenangan').src = elemenGambar.src;
+    document.getElementById('popJudulKenangan').innerText = elemenGambar.alt;
+    document.getElementById('popDeskripsiKenangan').innerText = elemenGambar.getAttribute('data-deskripsi') || "-";
+    gModal.style.display = "flex";
+}
+function tutupFotoKenangan() { mainkanSuaraKlik(); gModal.style.display = "none"; }
+
+// =======================================================
+// 6. BACK TO TOP & SMOOTH NAV
+// =======================================================
+const tombolAtas = document.getElementById("btnKeAtas");
+window.onscroll = function() { tombolAtas.style.display = (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) ? "block" : "none"; };
+function keAtasSystem() { mainkanSuaraKlik(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+document.querySelectorAll('nav a').forEach(link => { link.addEventListener('click', () => mainkanSuaraKlik()); });
+
+// =======================================================
+// 7. CLICK PARTICLES & OUTSIDE CLICK
+// =======================================================
+document.addEventListener('click', function(e) {
+    for (let i = 0; i < 8; i++) {
+        const partikel = document.createElement('div');
+        partikel.className = 'click-particle';
+        partikel.style.left = e.clientX + 'px';
+        partikel.style.top = e.clientY + 'px';
+        partikel.style.setProperty('--x', (Math.random() - 0.5) * 120 + 'px');
+        partikel.style.setProperty('--y', (Math.random() - 0.5) * 120 + 'px');
+        const ukuran = Math.random() * 6 + 4 + 'px';
+        partikel.style.width = ukuran; partikel.style.height = ukuran;
+        document.body.appendChild(partikel);
+        setTimeout(() => partikel.remove(), 600);
+    }
+});
+
+window.addEventListener('click', function(event) {
+    if (event.target === modal) { mainkanSuaraKlik(); modal.style.display = "none"; }
+    if (event.target === gModal) { mainkanSuaraKlik(); gModal.style.display = "none"; }
+    if (event.target === modalCalc) { modalCalc.style.display = "none"; }
+});
+
+// =======================================================
+// 8. QUOTES OF THE DAY
+// =======================================================
+document.addEventListener("DOMContentLoaded", function() {
+    const bankQuotes = [
+        { q: "Hidup ini bukan tentang seberapa cepat kamu sampai, melainkan tentang ketangguhanmu untuk bangkit setiap kali terjatuh.", a: "Jalannya Proses" },
+        { q: "Jangan pernah mengutuk kegelapan malam, karena dari sanalah kita belajar menghargai sekecil apa pun cahaya fajar.", a: "Pola Pikir" },
+        { q: "Air mata hari ini adalah pupuk bagi senyuman manismu di masa depan.", a: "Sabar & Kuat" },
+        { q: "Manusia tidak dirancang untuk menjadi sempurna, kita dirancang untuk menjadi lebih baik dari hari kemarin.", a: "Evolusi Diri" },
+        { q: "Selesaikan apa yang sudah kamu mulai, biarkan semesta yang menuliskan akhir ceritanya dengan indah.", a: "X E5 Admin" }
+    ];
+    const indexQuote = (new Date().getDate() - 1) % bankQuotes.length;
+    document.getElementById("teksQuotes").innerText = `"${bankQuotes[indexQuote].q}"`;
+    document.getElementById("authorQuotes").innerText = `- ${bankQuotes[indexQuote].a}`;
+});
+
+// =======================================================
+// 9. KALKULATOR & CETAK PDF RAPI
+// =======================================================
+const modalCalc = document.getElementById("modalKalkulator");
+function bukaKalkulator() { mainkanSuaraKlik(); modalCalc.style.display = "flex"; }
+function tutupKalkulator() { mainkanSuaraKlik(); modalCalc.style.display = "none"; }
+function tambahBarisMapel() {
+    mainkanSuaraKlik();
+    const container = document.getElementById("containerListMapel");
+    const div = document.createElement("div"); div.className = "row-mapel-input";
+    div.innerHTML = `<input type="text" class="input-nama-mapel" placeholder="Nama Mapel"><input type="number" class="input-nilai-mapel" placeholder="Nilai" min="0" max="100"><button class="btn-hapus-row" onclick="hapusBarisMapel(this)">&times;</button>`;
+    container.appendChild(div); container.scrollTop = container.scrollHeight;
+}
+function hapusBarisMapel(tombol) { mainkanSuaraKlik(); tombol.parentElement.remove(); }
+
+function hitungRaporDinamis() {
+    mainkanSuaraKlik();
+    const namaSiswa = document.getElementById("valNamaSiswaRaport").value.trim() || "SISWA X E5";
+    const semuaInput = document.getElementsByClassName("input-nilai-mapel");
+    let totalNilai = 0, valid = 0;
+    for (let i = 0; i < semuaInput.length; i++) {
+        const val = parseFloat(semuaInput[i].value);
+        if (!isNaN(val) && val >= 0 && val <= 100) { totalNilai += val; valid++; }
+    }
+    if (valid === 0) return alert("Isi minimal satu nilai!");
+    const rata = totalNilai / valid;
+    document.getElementById("hasilKalkulator").style.display = "block";
+    document.getElementById("resNamaPemilik").innerText = `RAPOR MILIK: ${namaSiswa.toUpperCase()}`;
+    document.getElementById("resTotalMapel").innerText = valid;
+    document.getElementById("resAngka").innerText = rata.toFixed(1);
+    
+    const status = document.getElementById("resStatus");
+    if (rata >= 75) { status.innerText = "STATUS: LULUS KKM KELAS 🟢"; status.style.color = "#2ecc71"; document.getElementById("resAngka").style.color = "#2ecc71"; } 
+    else { status.innerText = "STATUS: DI BAWAH KKM KELAS 🔴"; status.style.color = "#e74c3c"; document.getElementById("resAngka").style.color = "#e74c3c"; }
+}
+
+async function downloadRaporPDF() {
+    mainkanSuaraKlik();
+    const btn = document.getElementById('btnDownloadPDF');
+    btn.innerText = "Mencetak Dokumen...";
+    
+    // 1. Siapkan Data
+    const nama = document.getElementById("valNamaSiswaRaport").value.trim() || "SISWA X E5";
+    document.getElementById("pdfNamaSiswa").innerText = nama.toUpperCase();
+    
+    const d = new Date();
+    document.getElementById("pdfTanggal").innerText = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+    
+    // 2. Susun Tabel Nilai ke DOM Tersembunyi
+    const rows = document.getElementsByClassName("row-mapel-input");
+    let tabelHTML = "";
+    for(let i=0; i<rows.length; i++){
+        const mapel = rows[i].querySelector('.input-nama-mapel').value || `Mata Pelajaran ${i+1}`;
+        const nilai = rows[i].querySelector('.input-nilai-mapel').value;
+        if(nilai){
+            tabelHTML += `<tr><td style="border:1px solid #000; padding:10px;">${mapel.toUpperCase()}</td><td style="border:1px solid #000; padding:10px; text-align:center;">${nilai}</td></tr>`;
+        }
+    }
+    document.getElementById("pdfTabelNilai").innerHTML = tabelHTML;
+    document.getElementById("pdfTotalMapel").innerText = document.getElementById("resTotalMapel").innerText;
+    document.getElementById("pdfRataRata").innerText = document.getElementById("resAngka").innerText;
+    document.getElementById("pdfStatus").innerText = document.getElementById("resStatus").innerText.replace(/[🟢🔴]/g,'');
+
+    // 3. Render Area Cetak Tersembunyi jadi PDF
+    try {
+        const { jsPDF } = window.jspdf;
+        const areaCetak = document.getElementById('areaCetakPDF');
+        
+        // Temporarily put it on screen but hidden, so html2canvas renders it properly
+        areaCetak.style.top = '0';
+        areaCetak.style.left = '0';
+        areaCetak.style.zIndex = '-100';
+
+        const canvas = await html2canvas(areaCetak, { scale: 2, backgroundColor: '#ffffff' });
+        
+        // Hide it again
+        areaCetak.style.top = '-9999px';
+        areaCetak.style.left = '-9999px';
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+        pdf.save(`Rapor_${nama.replace(/\s+/g, '_')}.pdf`);
+    } catch(e) { 
+        alert("Gagal cetak PDF. Pastikan jaringan stabil."); 
+    }
+    btn.innerText = "📥 Download Rapor PDF";
+}
+
+// =======================================================
+// 10. FITUR HITUNG MUNDUR ULANG TAHUN
+// =======================================================
+document.addEventListener("DOMContentLoaded", function() {
+    const bulanMap = {"januari":0, "februari":1, "maret":2, "april":3, "mei":4, "juni":5, "juli":6, "july":6, "agustus":7, "september":8, "oktober":9, "november":10, "desember":11};
+    const daftarSiswa = document.querySelectorAll('.frame-foto img');
+    let dataUltah = [];
+    const hariIni = new Date();
+    hariIni.setHours(0,0,0,0);
+
+    daftarSiswa.forEach(img => {
+        const strTanggal = img.getAttribute('data-ultah');
+        const namaLengkap = img.getAttribute('data-nama');
+        if(strTanggal && strTanggal !== "-") {
+            const pecah = strTanggal.toLowerCase().split(' ');
+            if(pecah.length >= 3) {
+                const tanggal = parseInt(pecah[0]);
+                const bulan = bulanMap[pecah[1]];
+                if(!isNaN(tanggal) && bulan !== undefined) {
+                    let nextUltah = new Date(hariIni.getFullYear(), bulan, tanggal);
+                    if (nextUltah < hariIni) {
+                        nextUltah.setFullYear(hariIni.getFullYear() + 1); // Tahun depan jika sudah lewat
+                    }
+                    const diffWaktu = nextUltah.getTime() - hariIni.getTime();
+                    const sisaHari = Math.ceil(diffWaktu / (1000 * 3600 * 24));
+                    dataUltah.push({ nama: namaLengkap, sisaHari: sisaHari, teksTanggal: `${tanggal} ${pecah[1].toUpperCase()}` });
+                }
+            }
+        }
+    });
+
+    dataUltah.sort((a, b) => a.sisaHari - b.sisaHari);
+    const containerUltah = document.getElementById('containerUltah');
+    
+    if(dataUltah.length > 0) {
+        containerUltah.innerHTML = "";
+        // Ambil 3 teratas
+        for(let i=0; i < Math.min(3, dataUltah.length); i++) {
+            let labelHari = dataUltah[i].sisaHari === 0 ? "HARI INI! 🎉" : `${dataUltah[i].sisaHari} hari lagi`;
+            containerUltah.innerHTML += `
+                <div class="ultah-card">
+                    <div class="ultah-icon">🎂</div>
+                    <div class="ultah-info">
+                        <h4>${dataUltah[i].nama}</h4>
+                        <p>${dataUltah[i].teksTanggal}</p>
+                        <span class="countdown">${labelHari}</span>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        containerUltah.innerHTML = `<p style="color:var(--text-muted);">Data tanggal lahir belum lengkap.</p>`;
+    }
+});
+
+// =======================================================
+// 11. FITUR BUKU TAMU DIGITAL (WHATSAPP)
+// =======================================================
+function kirimWhatsApp() {
+    mainkanSuaraKlik();
+    const nama = document.getElementById('gbNama').value.trim();
+    const pesan = document.getElementById('gbPesan').value.trim();
+    
+    if(!nama || !pesan) {
+        alert("Harap isi Nama dan Pesan Anda terlebih dahulu!");
+        return;
+    }
+    
+    // Format pesan WhatsApp
+    const teksWA = `Halo Admin XE5,%0A%0ASaya *${nama}* ingin mengisi buku tamu portal kelas:%0A%0A"${pesan}"`;
+    const noWA = "6285715010454";
+    
+    window.open(`https://wa.me/${noWA}?text=${teksWA}`, '_blank');
+}
+
+// =======================================================
+// 12. TOGGLE TEMA GELAP / TERANG
+// =======================================================
+function toggleTheme() {
+    mainkanSuaraKlik();
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+});
+<!-- MODAL LOGIN ADMIN -->
+<div id="adminModal" class="admin-modal">
+    <div class="admin-modal-content">
+        <span class="close-btn" onclick="tutupModalAdmin()">&times;</span>
+        <h4>🔐 ADMIN LOGIN</h4>
+        <p>Masukkan password admin untuk mengelola pengumuman.</p>
+        <input type="password" id="inputPasswordAdmin" placeholder="Password admin..." onkeydown="if(event.key==='Enter') cekPasswordAdmin()">
+        <button class="btn-masuk-admin" onclick="cekPasswordAdmin()">MASUK</button>
+        <div class="login-error" id="loginError">❌ Password salah!</div>
+    </div>
+</div>
+
+<!-- FIREBASE PENGUMUMAN (pakai CDN compat agar tidak konflik dengan script lama) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ===== INIT FIREBASE =====
+const firebaseConfig = {
+    apiKey: "AIzaSyD0fruoPBsGqXV74dVqex6KhN2b2oN0bTw",
+    authDomain: "websitekelas1.firebaseapp.com",
+    projectId: "websitekelas1",
+    storageBucket: "websitekelas1.firebasestorage.app",
+    messagingSenderId: "914193160974",
+    appId: "1:914193160974:web:668aa41b1798723219d55f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ===== ADMIN =====
+const ADMIN_PASS = "xekelas5admin";
+let ketukanCount = 0, ketukanTimer;
+
+document.getElementById('judulPengumuman').addEventListener('click', function() {
+    ketukanCount++;
+    clearTimeout(ketukanTimer);
+    ketukanTimer = setTimeout(() => { ketukanCount = 0; }, 2000);
+    if (ketukanCount >= 5) {
+        ketukanCount = 0;
+        if (!document.body.classList.contains('admin-mode')) {
+            const btn = document.getElementById('btnLoginAdmin');
+            btn.style.display = btn.style.display === 'none' ? 'inline-block' : 'none';
+        }
+    }
+});
+
+function bukaModalAdmin() {
+    document.getElementById('adminModal').classList.add('aktif');
+    document.getElementById('inputPasswordAdmin').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    setTimeout(() => document.getElementById('inputPasswordAdmin').focus(), 100);
+}
+function tutupModalAdmin() {
+    document.getElementById('adminModal').classList.remove('aktif');
+}
+function cekPasswordAdmin() {
+    if (document.getElementById('inputPasswordAdmin').value === ADMIN_PASS) {
+        document.body.classList.add('admin-mode');
+        sessionStorage.setItem('xeAdmin', '1');
+        tutupModalAdmin();
+        document.getElementById('btnLoginAdmin').style.display = 'none';
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('inputPasswordAdmin').value = '';
+    }
+}
+function logoutAdmin() {
+    document.body.classList.remove('admin-mode');
+    sessionStorage.removeItem('xeAdmin');
+}
+if (sessionStorage.getItem('xeAdmin') === '1') document.body.classList.add('admin-mode');
+
+document.getElementById('adminModal').addEventListener('click', function(e) {
+    if (e.target === this) tutupModalAdmin();
+});
+
+// ===== POST PENGUMUMAN =====
+function postPengumuman() {
+    const judul = document.getElementById('inputJudulPengumuman').value.trim();
+    const isi = document.getElementById('inputIsiPengumuman').value.trim();
+    if (!judul || !isi) { alert('Judul dan isi tidak boleh kosong!'); return; }
+    db.collection('pengumuman').add({ judul, isi, waktu: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(() => {
+        document.getElementById('inputJudulPengumuman').value = '';
+        document.getElementById('inputIsiPengumuman').value = '';
+    }).catch(e => alert('Gagal: ' + e.message));
+}
+
+// ===== HAPUS =====
+function hapusPengumuman(id) {
+    if (!confirm('Hapus pengumuman ini?')) return;
+    db.collection('pengumuman').doc(id).delete().catch(e => alert('Gagal: ' + e.message));
+}
+
+// ===== REALTIME LOAD =====
+db.collection('pengumuman').orderBy('waktu', 'desc').onSnapshot(function(snapshot) {
+    const list = document.getElementById('listPengumuman');
+    if (snapshot.empty) { list.innerHTML = '<div class="pengumuman-kosong">📭 Belum ada pengumuman.</div>'; return; }
+    list.innerHTML = '';
+    snapshot.forEach(function(docSnap) {
+        const d = docSnap.data();
+        const waktu = d.waktu ? new Date(d.waktu.seconds * 1000).toLocaleString('id-ID', {day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Baru saja';
+        const card = document.createElement('div');
+        card.className = 'pengumuman-card';
+        card.innerHTML = '<button class="p-hapus" onclick="hapusPengumuman(\'' + docSnap.id + '\')">🗑 Hapus</button><div class="p-judul">' + d.judul + '</div><div class="p-isi">' + d.isi + '</div><div class="p-meta">📅 ' + waktu + '</div>';
+        list.appendChild(card);
+    });
+}, function() {
+    document.getElementById('listPengumuman').innerHTML = '<div class="pengumuman-kosong">⚠️ Gagal memuat. Cek koneksi.</div>';
+});
+</script>
+</body>
+</html>
